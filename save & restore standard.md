@@ -226,7 +226,7 @@ The standard specifies the interface and functionality that shells expose to the
 ## Saving the state of a shell
 
 ```javascript
-orcestration_save (mode="shallow", custom_params = null)
+orcestration_save (mode="shallow", custom_params = None)
 ```
 #### Command Input
 The 'orcestration_save' command interface supports two modes:
@@ -254,10 +254,10 @@ The output of this function will be stored as the snapshot details, when trying 
 
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---
-saved_details | string | No | composite data structure that represents the details of the snapshot
+saved_artifact | string | No | composite data structure that represents the details of the snapshot
 
 ```javascript
-saved_details{
+saved_artifact{
   restore_rules: {
   }
   saved_location : {
@@ -338,8 +338,8 @@ The orcestration_restore function is responsible of restoring a shell to its pre
 
 #### Command Input
 ```javascript
-orcestration_restore (saved_details)
+orcestration_restore (saved_artifact)
 ```
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---
-saved_details | string | No | composite data structure that represents the details of the snapshot, the value that will be passed as input must be the same as the exact value that the save function returned.
+saved_artifact | string | No | composite data structure that represents the details of the snapshot, the value that will be passed as input must be the same as the exact value that the save function returned.

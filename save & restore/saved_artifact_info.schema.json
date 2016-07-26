@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "definitions": {
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "artifact_type": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "identifier"
+      ]
+    }
+  },
+  "properties": {
+    "saved_artifacts_info": {
+      "type": "object",
+      "properties": {
+        "resource_name": {
+          "type": "string"
+        },
+        "created_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "restore_rules": {
+          "type": "object",
+          "properties": {
+            "requires_sames_resource": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "requires_sames_resource"
+          ]
+        },
+        "saved_artifact": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/artifact"
+            },
+            {
+              "properties": {}
+            }
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "resource_name",
+        "created_date",
+        "restore_rules",
+        "saved_artifact"
+      ]
+    }
+  },
+  "required": [
+    "saved_artifacts_info"
+  ]
+}

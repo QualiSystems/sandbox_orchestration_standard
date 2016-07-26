@@ -37,7 +37,7 @@
             }
           },
           "required": [
-            "requires_sames_resource"
+            "requires_same_resource"
           ]
         },
         "saved_artifact": {

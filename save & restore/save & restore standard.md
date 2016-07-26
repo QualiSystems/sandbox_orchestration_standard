@@ -23,7 +23,7 @@ The command creates a new snapshot record for the sandbox which includes all the
 
 Each shell is responsible for saving its own state and restoring back to that state, the orchestration command is responsible for collecting all the different configurations, add the general information and store it in a predefined repository.
 
-```javascript
+```python
 save_snapshot (snapshot_ID, override="false")
 ```
 
@@ -110,14 +110,16 @@ To enable users to **reserve the blueprint again** and restore the sandbox, a ne
 ##### metadata.json
 This file includes general information about the snapshot.
 
-```javascript
-metadata: {
-  "ID":"[the snapshot identifier]",
-  "Blueprint Name": "[the name of the blueprint]",
-  "Sandbox ID": "[the ID of the sandbox]",
-  "Sandbox Name": "[the name of the sandbox]",
-  "Owner": "[the owner of the sandbox]",
-  "DateTime": "[Snapshot date and time, format: YYYY-MM-DD hh:mm:ss]"
+```json
+{
+    "metadata": {
+      "ID":"[the snapshot identifier]",
+      "Blueprint Name": "[the name of the blueprint]",
+      "Sandbox ID": "[the ID of the sandbox]",
+      "Sandbox Name": "[the name of the sandbox]",
+      "Owner": "[the owner of the sandbox]",
+      "DateTime": "[Snapshot date and time, format: YYYY-MM-DD hh:mm:ss]"
+  }
 }
 ```
 
@@ -125,21 +127,23 @@ metadata: {
 ##### connectivity.json
 This file stores the connectivity state when the snapshot was saved.
 
-```javascript
-connectivity: {
-  connections: {
-    connection: {
-      "type": "[the type of conncetion: route / connector]",
-      "source": "[the name of the source resource]",
-      "target": "[the name of the target resource]",
-      "state": "[the state of the connection: connected / disconnected]",
-      "network": "the name of the network (as defined in the networks node below)"
-    }
-  }
-  networks: {
-    network: {
-      "type": "the type of network - service model: vlan auto, vlan manual",
-      "attributes": "attributes of the networking service: allocation range, qnq",
+```json
+{
+  "connectivity": {
+    "connections": {
+      "connection": {
+        "type": "[the type of conncetion: route / connector]",
+        "source": "[the name of the source resource]",
+        "target": "[the name of the target resource]",
+        "state": "[the state of the connection: connected / disconnected]",
+        "network": "the name of the network (as defined in the networks node below)"
+      }
+    },
+    "networks": {
+      "network": {
+        "type": "the type of network - service model: vlan auto, vlan manual",
+        "attributes": "attributes of the networking service: allocation range, qnq"
+      }
     }
   }
 }
@@ -152,7 +156,7 @@ connectivity: {
 The restore command searches for the snapshot in the snapshot repository, and restores the state of the sandbox.
 The command can be called manually during the sandbox lifetime or automatically on setup in case a new sandbox is created from the blueprint that was saved during save_sandbox command.
 
-```javascript
+```python
 restore_snapshot (snapshot_ID)
 ```
 
@@ -178,7 +182,7 @@ None. In case of error,   an error message is printed to the output console.
 
 # Get available snapshots for a sandbox
 
-```javascript
+```python
 get_snapshots ()
 ```
 
@@ -191,16 +195,18 @@ Parameter | Data Type | Required | Description
 --- | --- | --- | ---
 result | string | No | json that represents the list of snapshots for the sandbox, each snapshot will be represented by the content of its metadata.json file.
 
-```javascript
-sandbox_snapshots{
-  snapshot: {
-    "ID":"[the snapshot identifier]"
-    "Blueprint Name": "[the name of the blueprint]"
-    "Sandbox ID": "[the ID of the sandbox]"
-    "Sandbox Name": "[the name of the sandbox]",
-    "Sandbox Description": "[the description of the sandbox]"
-    "Owner": "[the owner of the sandbox]"
-    "DateTime": "[Snapshot date and time, format: YYYY-MM-DD hh:mm:ss]"
+```json
+{
+  "sandbox_snapshots":{
+    "snapshot": {
+      "ID":"[the snapshot identifier]",
+      "Blueprint Name": "[the name of the blueprint]",
+      "Sandbox ID": "[the ID of the sandbox]",
+      "Sandbox Name": "[the name of the sandbox]",
+      "Sandbox Description": "[the description of the sandbox]",
+      "Owner": "[the owner of the sandbox]",
+      "DateTime": "[Snapshot date and time, format: YYYY-MM-DD hh:mm:ss]"
+    }
   }
 }
 ```
@@ -225,7 +231,7 @@ The standard specifies the interface and functionality that shells expose to the
 
 ## Saving the state of a shell
 
-```javascript
+```python
 orcestration_save (mode="shallow", custom_params = None)
 ```
 #### Command Input
@@ -243,9 +249,11 @@ mode | string | No | shallow / deep
 custom_params | string | No | a json data structure with specific attributes that the shell may need, in most cases this inputs will stay empty. If some level of configuration is needed, it is recommended to use resource attributes so that the setting can be defined once.
 
 
-```javascript
-custom_params{
-  "vrf-management-name": "network-1" // an example of a custom parameter
+```json
+{
+  "custom_params": {
+    "vrf-management-name": "network-1"
+  }
 }
 ```
 
@@ -254,18 +262,20 @@ The output of this function will be stored as the snapshot details, when trying 
 
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---
-saved_artifact | string | No | composite data structure that represents the details of the snapshot
+saved_artifacts_info | string | No | composite data structure that represents the details of the snapshot
 
-```javascript
-saved_artifact{
-  restore_rules: {
-  }
-  saved_location : {
-    "type": "vm-snapshot"
-    "identifier": "snapshot01"
-    "cloud-provider": "vCenter1"
-  }
-  custom_params: {
+```json
+{
+  "saved_artifacts_info": {
+    "resource_name": "VM1",
+    "created_date": "3577-04-27T00:17:48.819Z",
+    "restore_rules": {
+      "requires_sames_resource": false
+    },    
+    "saved_artifact" :{
+      "artifact_type": "filesystem",
+      "identifier": "//file_server/image.ova"
+    }
   }
 }
 ```
@@ -276,41 +286,47 @@ Some implementations may require the snapshot to be restored on the same device 
 In the future, additional resources may be added to this object.
 
 For example:
-```javascript
-out:
+```json
 {
-  restore_rules: {
-    "requires_sames_resource": "true"
+  "restore_rules": {
+    "requires_same_resource": true
   }
+}
 ```
 
-##### Output - Saved Location
+##### Output - Saved artifact
 This object represents the snapshot details, it will be different according to the storing technology - e.g. ftp server, vCenter snapshot etc.
 
 Example - a cloud-provider snapshot i.e: the details of an amazon AMI or a vCenter snapshot identifier
-```javascript
-  saved_location :{
-    "type": "vm-snapshot"
+```json
+{
+  "saved_artifact" :{
+    "artifact_type": "vm-snapshot",
     "identifier": "snapshot01"
-    "cloud-provider": "vCenter1"
   }
+}
 ```
 
 Example - a shared storage that stores the backup image
-```javascript
-saved_location :{
-  "type": "filesystem"
-  "location": "//file_server/image.ova"
+```json
+{
+  "saved_artifact" :{
+    "artifact_type": "filesystem",
+    "identifier": "//file_server/image.ova"
+  }
 }
 ```
 
 
 Example - image file that is stored in a ftp server
-```javascript
-saved_location :{
-    "type": "ftp"
-    "ftp_resource": "ftp_srv1"
+```json
+{
+  "saved_artifact" :{
+      "artifact_type": "ftp",
+      "ftp_resource": "ftp_srv1",
+      "identifier": "//folder1/image.ova"
   }
+}
 ```
 
 In this example *ftp_srv1* is a resource that represents the ftp server and has the connection details to the server, for example:
@@ -319,13 +335,13 @@ user: "user x"
 pws: "123456"
 
 
-##### Output - Custom Params
-This object represents custom data for the snapshot.
-The save method can send back any custom data that is needed in order to restore the shell later.  
-In most cases, this object will remain empty.
-
-```javascript
-  custom_params: {
+Example - saving multiple configuration files
+```json
+{
+  "saved_artifact" :{
+    "artifact_type": "multiple-files",
+    "identifier": "snapshot-123456",
+    "filelist" : [ "file1", "file2" , "file3"]    
   }
 }
 ```
@@ -337,9 +353,9 @@ The orcestration_restore function is responsible of restoring a shell to its pre
 
 
 #### Command Input
-```javascript
-orcestration_restore (saved_artifact)
+```python
+orcestration_restore (saved_artifacts_info)
 ```
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---
-saved_artifact | string | No | composite data structure that represents the details of the snapshot, the value that will be passed as input must be the same as the exact value that the save function returned.
+saved_artifacts_info | string | No | composite data structure that represents the details of the snapshot, the value that will be passed as input must be the same as the exact value that the save function returned.

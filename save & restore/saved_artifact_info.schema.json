@@ -32,7 +32,7 @@
         "restore_rules": {
           "type": "object",
           "properties": {
-            "requires_sames_resource": {
+            "requires_same_resource": {
               "type": "boolean"
             }
           },

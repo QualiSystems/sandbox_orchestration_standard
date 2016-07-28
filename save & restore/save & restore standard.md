@@ -232,10 +232,10 @@ The standard specifies the interface and functionality that shells expose to the
 ## Saving the state of a shell
 
 ```python
-orcestration_save (mode="shallow", custom_params = None)
+orchestration_save (mode="shallow", custom_params = None)
 ```
 #### Command Input
-The 'orcestration_save' command interface supports two modes:
+The 'orchestration_save' command interface supports two modes:
  - Shallow (Default) - saves a snapshot that can later be restored
  - Deep - saves the backup of the resource that can later be restored, this option consumes more disk space as a full backup of the resource is expected to be made.
 
@@ -349,12 +349,12 @@ Example - saving multiple configuration files
 
 
 ## Restoring a shell to its previous state
-The orcestration_restore function is responsible of restoring a shell to its previous saved state.
+The orchestration_restore function is responsible of restoring a shell to its previous saved state.
 
 
 #### Command Input
 ```python
-orcestration_restore (saved_artifacts_info)
+orchestration_restore (saved_artifacts_info)
 ```
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---

@@ -24,17 +24,15 @@ The command creates a new snapshot record for the sandbox which includes all the
 Each shell is responsible for saving its own state and restoring back to that state, the orchestration command is responsible for collecting all the different configurations, add the general information and store it in a predefined repository.
 
 ```python
-save_snapshot (snapshot_ID, override="false")
+def save_snapshot (snapshot_ID, override="false")
 ```
 
-#### Command Input
-Parameter | Data Type | Required | Description
---- | --- | --- | ---
-snapshot_ID | string | No | A unique identifier for the snapshot, if the ID is not specified use a combination of username + time (YY_MM_DD hh_mm_ss)
-override | bool | No | specify whether the snapshot should be overriden in case it already exists
+###### Parameters
+Input / Output | Parameter | Data Type | Required | Description
+--- | --- | --- | --- | ---
+Input | snapshot_ID | string | No | A unique identifier for the snapshot, if the ID is not specified use a combination of username + time (YY_MM_DD hh_mm_ss)
+Input | override | bool | No | specify whether the snapshot should be overriden in case it already exists
 
-#### Command Output
-None. In case of error, the error message will be printed to the output console.
 
 #### Repository:
 Any repository can be used to save the snapshot details.  The specifications below present a simple file server repository as an example. However, an ftp server or any other key-value repository can be used.
@@ -157,17 +155,13 @@ The restore command searches for the snapshot in the snapshot repository, and re
 The command can be called manually during the sandbox lifetime or automatically on setup in case a new sandbox is created from the blueprint that was saved during save_sandbox command.
 
 ```python
-restore_snapshot (snapshot_ID)
+def restore_snapshot (snapshot_ID)
 ```
 
-#### Command Input
-Parameter | Data Type | Required | Description
---- | --- | --- | ---
-snapshot_ID | string | No | The unique identifier of the snapshot that needs to be restored
-
-
-#### Command Output
-None. In case of error,   an error message is printed to the output console.
+###### Parameters
+Input / Output | Parameter | Data Type | Required | Description
+--- | --- | --- | --- | ---
+Input | snapshot_ID | string | No | The unique identifier of the snapshot that needs to be restored
 
 
 #### Command Description
@@ -183,17 +177,13 @@ None. In case of error,   an error message is printed to the output console.
 # Get available snapshots for a sandbox
 
 ```python
-get_snapshots ()
+def get_snapshots ()
 ```
 
-#### Command Input
-None
-
-
-#### Output
-Parameter | Data Type | Required | Description
---- | --- | --- | ---
-result | string | No | json that represents the list of snapshots for the sandbox, each snapshot will be represented by the content of its metadata.json file.
+###### Parameters
+Input / Output | Parameter | Data Type | Required | Description
+--- | --- | --- | --- | ---
+Output | result | string | No | json that represents the list of snapshots for the sandbox, each snapshot will be represented by the content of its metadata.json file.
 
 ```json
 {
@@ -232,7 +222,7 @@ The standard specifies the interface and functionality that shells expose to the
 ## Saving the state of a shell
 
 ```python
-orchestration_save (mode="shallow", custom_params = None)
+def orchestration_save (mode="shallow", custom_params = None)
 ```
 #### Command Input
 The 'orchestration_save' command interface supports two modes:
@@ -354,7 +344,7 @@ The orchestration_restore function is responsible of restoring a shell to its pr
 
 #### Command Input
 ```python
-orchestration_restore (saved_artifacts_info)
+def orchestration_restore (saved_artifacts_info)
 ```
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---

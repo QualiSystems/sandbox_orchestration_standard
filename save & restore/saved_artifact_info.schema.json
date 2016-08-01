@@ -19,7 +19,7 @@
     }
   },
   "properties": {
-    "saved_artifacts_info": {
+    "saved_artifact_info": {
       "type": "object",
       "properties": {
         "resource_name": {

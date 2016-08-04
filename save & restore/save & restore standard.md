@@ -1,4 +1,7 @@
 # Save & Restore
+
+#### Version 1.0.1
+
 CloudShell allows users to save the state of a Sandbox and restore the sandbox to one of its previous states, freeing up expensive resources in between.
 
 The sandbox supports 3 commands:
@@ -12,6 +15,7 @@ The document specifies the standard recommended way of saving and restoring sand
 
 Version | Date | Notes
 --- | --- | ---
+1.0.1 | 2016-08-04 | Included support for apps and shell blueprint
 1.0.0 | 2016-07-17 | First release of the Save & Restore Standard
 
 
@@ -50,6 +54,8 @@ Hierarchy | Content
 / snapshots / [snapshot ID] / resources | resource_name.json - a configuration file that represents the resource state
 / snapshots / [snapshot ID] / abstracts | The location of all the abstracts configuration files
 / snapshots / [snapshot ID] / abstracts / abstract_alias.json | a configuration file that represents the resource state (for abstract resources)
+/ snapshots / [snapshot ID] / apps | app_name.json - a configuration file that represents the deployed app state
+
 
 
 #### file server - example:
@@ -63,6 +69,8 @@ Hierarchy | Content
           - dut1.json
         - /abstracts
           - traffic_generator1.json
+        - /apps
+          - mysql1.json
      - /my snapshot #3
        - metadata.json
        - connectivity.json
@@ -86,7 +94,7 @@ The sandbox repository can be represented as a resource or service in the worksp
 
 4. Create the connectivity.json file with the state of all the connections in the sandbox
 
-5. Identify the shells in the sandbox and call the 'save' command for each one of the shells, for each shell, create a resource_name.json file with the returned json
+5. Identify the shells in the sandbox and call the 'save' command for each one of the shells. for each shell, create a resource_name.json file.
 
 6. Shells that were initiated from abstract resources, should be saved under abstracts folder with the abstract title as the file key
 
@@ -165,11 +173,15 @@ Input | snapshot_ID | string | No | The unique identifier of the snapshot that n
 
 
 #### Command Description
-1. 1.	Search for the snapshot_ID in the repository. If the named snapshot does not exist - return an error message.
+1. Search for the snapshot_ID in the repository. If the named snapshot does not exist - return an error message.
 
-2. Identify the shells in the sandbox and call the 'restore' command for each one of the shells, passing the same resource_name.json / abstract.json files that were saved as input to the shell restore command.
+2. Identify the shells in the sandbox and restore each one separately by:
+   -  Read the saved .json file that represents the snapshot of the resource
+   -  Based on the blueprint info - validate that the blueprint in the sandbox matches the blueprint in the snapshot - make changes if neededself. For apps, create / edit the app blueprint and deploy the app.
+   - Call the restore command on the shell and pass the content of the .json as input so that the shell will be able to restore its state.
 
-3. 3.	Modify the connections according to the connectivity.json file that was saved. The sandbox setup should take care of the default connectivity, the command should compare the state with the snapshot and apply the modifications including disconnect routes, add new connections, change network specifications etc.
+
+3.	Modify the connections according to the connectivity.json file that was saved. The sandbox setup should take care of the default connectivity, the command should compare the state with the snapshot and apply the modifications including disconnect routes, add new connections, change network specifications etc.
 
 
 
@@ -252,12 +264,13 @@ The output of this function will be stored as the snapshot details, when trying 
 
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---
-saved_artifacts_info | string | No | composite data structure that represents the details of the snapshot
+saved_artifact_info | string | No | composite data structure that represents the details of the snapshot
 
 ```json
 {
-  "saved_artifacts_info": {
+  "saved_artifact_info": {
     "resource_name": "VM1",
+    "resource_id" : "5F2EAA6C-E3FD-4DF0-8E2D-F05C81D61631",
     "created_date": "3577-04-27T00:17:48.819Z",
     "restore_rules": {
       "requires_sames_resource": false
@@ -265,6 +278,9 @@ saved_artifacts_info | string | No | composite data structure that represents th
     "saved_artifact" :{
       "artifact_type": "filesystem",
       "identifier": "//file_server/image.ova"
+    }
+    "blueprint" :{
+
     }
   }
 }
@@ -338,14 +354,59 @@ Example - saving multiple configuration files
 
 
 
+##### Output - blueprint
+This object includes information about the shell blueprint state in the sandbox.
+
+**For physical resources** - this object represents the structure of the resource that was part of the reservation.
+For example:
+```json
+{
+	"blueprint": {
+		"resource_name": "Server1",
+		"sub_resources": [{
+			"resource_name": "Port1"
+		}, {
+			"resource_name": "Port2"
+		}]
+	}
+}
+```
+
+**For Apps** - this object represents the blueprint that is needed to restore the app, some details are omitted for brevity.
+"deploymentService" - includes the deployment service details to deploy this app: selected vCenter, template name etc
+"installationService" - includes the script information that needs to be used to deploy the app
+
+For example:
+```json
+{
+	"blueprint": {
+		"templateName": "MySQL",
+		"appResource": {
+			"modelName": "Generic App Model",
+			"driver": "Generic Driver"
+		},
+		"deploymentPaths": [{
+			"name": "vCenter VM From Template + Generic Installation Option",
+			"default": true,
+			"deploymentService": {
+
+			},
+			"installationService": {
+
+			}
+		}],
+	}
+}
+```
+
 ## Restoring a shell to its previous state
 The orchestration_restore function is responsible of restoring a shell to its previous saved state.
 
 
 #### Command Input
 ```python
-def orchestration_restore (saved_artifacts_info)
+def orchestration_restore (saved_artifact_info)
 ```
 Parameter | Data Type | Required | Description
 --- | --- | --- | ---
-saved_artifacts_info | string | No | composite data structure that represents the details of the snapshot, the value that will be passed as input must be the same as the exact value that the save function returned.
+saved_artifact_info | string | No | composite data structure that represents the details of the snapshot, the value that will be passed as input must be the same as the exact value that the save function returned.
